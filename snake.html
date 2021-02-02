@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Snake</title>
+  </head>
+
+  <body>
+
+    <div id="score-left"></div><div id="score-right"></div>
+    <canvas id="board" width="1000" height="600"></canvas>
+  </body>
+
+  <script>
+    const board_background = 'black';
+    const snake_color = '#59982f';
+    const snake_stroke = '#013220';
+    const apple_color = '#ff0800';
+    const apple_stroke = '#59982f';
+
+    let snake = [
+    {x: 500, y: 300},
+    {x: 480, y: 300},
+    {x: 460, y: 300},
+    {x: 440, y: 300},
+    {x: 420, y: 300}
+    ]
+
+    let game_over = 0;
+
+    let score = 0;
+    let lives = 3;
+
+    let ball_x = 500;
+    let ball_y = 300;
+
+    let dx = 20;
+    let dy = 0;
+
+    let apple_x = getRandomInt(0, 49) * 20;
+    let apple_y = getRandomInt(0, 29) * 20;
+
+    var speed = 100;
+
+    const board = document.getElementById("board");
+    const board_context = board.getContext("2d");
+
+    main();
+
+    document.addEventListener("keydown", changeSnakeDirection);
+
+    function main() {
+      if (lives > 0) {
+        setTimeout(function onTick() {
+          clear_board();
+          drawSnake();
+          moveSnake();
+          drawApple(apple_x, apple_y);
+          if (!game_over) {
+            main();
+          } else {
+            clear_board();
+          }
+        
+      }, speed)
+      } else {
+        gameOverBoard();
+      }
+    }
+
+    function clear_board() {
+
+      board_context.fillStyle = board_background;
+      board_context.fillRect(0, 0, board.width, board.height);
+
+      board_context.fillStyle = 'white';
+      board_context.font = "50px Arial";
+      board_context.fillText("Apples Eaten: " + score, 100, 100)
+      board_context.fillText("Lives Left: " + lives, 600, 100)
+
+    }
+
+    function drawSnake() {
+      snake.forEach(drawSnakeCubes)
+    }
+    
+    function drawSnakeCubes(snake_cube) {
+
+      board_context.fillStyle = snake_color;
+      board_context.fillRect(snake_cube.x, snake_cube.y, 20, 20);
+      board_context.strokeStyle = snake_stroke;
+      board_context.strokeRect(snake_cube.x, snake_cube.y, 20, 20);
+    }
+
+    function moveSnake() {
+      const head = 0;
+      const tail = snake.length-1;
+
+      if (snake[head].x < -20 || snake[head].x > board.width || snake[head].y < -20 || snake[head].y > board.height){
+        lives--;
+        game_over = 1;
+      }
+      for(let i = 1; i < snake.length; i++){
+        if (snake[i].x == snake[head].x && snake[i].y == snake[head].y){
+          lives--;
+          game_over = 1;
+        }
+      }
+
+      if (snake[head].x === apple_x && snake[head].y === apple_y){
+        apple_x = getRandomInt(0, 49) * 20;
+        apple_y = getRandomInt(0, 29) * 20;
+        score++;
+        const top = {x: snake[head].x + dx, y: snake[head].y + dy};
+        snake.unshift(top);
+      } else {
+        const top = {x: snake[head].x + dx, y: snake[head].y + dy};
+        snake.unshift(top);
+        snake.pop();
+      }
+    }
+
+    function changeSnakeDirection(event) {
+      const keyPressed = event.keyCode;
+      const LEFT_KEY = 37;
+      const UP_KEY = 38;
+      const RIGHT_KEY = 39;
+      const DOWN_KEY = 40;
+      const SPACE_KEY = 32;
+
+      if (keyPressed === LEFT_KEY && dx != 20) {
+        dx = -20;
+        dy = 0;
+      }
+
+      if (keyPressed === RIGHT_KEY && dx != -20) {
+        dx = 20;
+        dy = 0;
+      }
+
+      if (keyPressed === UP_KEY && dy != 20) {
+        dy = -20;
+        dx = 0;
+      }
+
+      if (keyPressed === DOWN_KEY && dy != -20) {
+        dy = 20;
+        dx = 0;
+      }
+
+      if (keyPressed === SPACE_KEY && game_over) {
+        dx = 20;
+        dy = 0;
+        snake = [
+          {x: 500, y: 300},
+          {x: 480, y: 300},
+          {x: 460, y: 300},
+          {x: 440, y: 300},
+          {x: 420, y: 300}
+          ]
+        game_over = 0;
+        main();
+      }
+    }
+
+    function drawApple(apple_x, apple_y) {
+        board_context.fillStyle = apple_color;
+        board_context.fillRect(apple_x, apple_y, 20, 20);
+        board_context.strokeStyle = apple_stroke;
+        board_context.strokeRect(apple_x, apple_y, 20, 20);
+    }
+
+    function gameOverBoard() {
+
+      board_context.fillStyle = board_background;
+      board_context.fillRect(0, 0, board.width, board.height);
+
+      board_context.fillStyle = 'white';
+      board_context.font = "50px Arial";
+      board_context.fillText("Apples Eaten: " + score, 100, 100)
+      board_context.fillText("Lives Left: " + lives, 600, 100)
+      board_context.fillText("Game Over", 400, 250)
+      board_context.font = "20px Arial";
+      board_context.fillText("Ctrl + R to Play Again", 400, 350)
+
+
+    }
+
+  function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+  }
+    
+  </script>
+</html>
